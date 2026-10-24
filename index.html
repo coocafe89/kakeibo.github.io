@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="かけいぼ">
+<title>かけいぼ</title>
+<style>
+:root{--ink:#1c2630;--sub:#6b7782;--line:#dfe4e8;--bg:#f2f4f6;--card:#fff;--c:#5b6770;--biz:#2c6db5;--home:#e07a1f;--out:#c0392b;--in:#1f8a5b}
+body[data-frame=biz]{--c:var(--biz)}
+body[data-frame=home]{--c:var(--home)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:18px/1.4 "Hiragino Sans","Noto Sans JP",system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;border:0;background:none;min-height:48px;cursor:pointer}
+input,textarea{font:inherit;font-size:18px;-webkit-user-select:text;user-select:text}
+#app{min-height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;background:var(--c);color:#fff;position:sticky;top:0;z-index:2}
+header h1{font-size:20px;margin:0}
+.back{color:#fff;padding:0 12px 0 0;font-size:18px}
+main{flex:1;padding:12px 14px 120px}
+.home{display:flex;flex-direction:column;gap:16px;padding:calc(env(safe-area-inset-top,0px) + 24px) 18px 24px;flex:1}
+.home h1{margin:0 0 4px;font-size:26px}
+.big{flex:1;min-height:110px;border-radius:20px;background:var(--card);box-shadow:0 2px 0 var(--line);font-size:30px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px}
+.big:active{transform:translateY(2px)}
+.big.in1{background:#2c6db5;color:#fff}
+.note{background:#fff3d6;border-radius:12px;padding:10px 14px;font-size:16px}
+.seg{display:flex;gap:8px;margin-bottom:12px}
+.seg button{flex:1;border-radius:12px;background:var(--card);border:2px solid var(--line);font-weight:700}
+.seg button.on{background:var(--c);border-color:var(--c);color:#fff}
+.seg.frame button[data-v=biz].on{background:var(--biz);border-color:var(--biz)}
+.seg.frame button[data-v=home].on{background:var(--home);border-color:var(--home)}
+.amt{background:var(--card);border-radius:16px;padding:8px 16px;text-align:right;font-size:20px;color:var(--sub)}
+.amt b{font-size:44px;color:var(--ink);letter-spacing:1px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+.pad button{background:var(--card);border-radius:12px;font-size:26px;font-weight:600;min-height:54px;box-shadow:0 2px 0 var(--line)}
+.pad button:active{background:var(--line)}
+label.t{display:block;font-size:15px;color:var(--sub);margin:12px 0 6px}
+.txt{width:100%;min-height:48px;padding:8px 14px;border:2px solid var(--line);border-radius:12px;background:var(--card)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{padding:0 16px;border-radius:24px;background:var(--card);border:2px solid var(--line)}
+.chips button.on{border-color:var(--c);background:var(--c);color:#fff;font-weight:700}
+.save{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 10px);background:linear-gradient(transparent,var(--bg) 30%)}
+.save button{width:100%;min-height:58px;border-radius:16px;background:var(--c);color:#fff;font-size:22px;font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);transform:translateX(-50%);background:#1c2630;color:#fff;padding:12px 20px;border-radius:24px;font-size:17px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9;white-space:nowrap}
+.toast.show{opacity:1}
+.stub{text-align:center;color:var(--sub);padding:60px 20px}
+.mon{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mon button{width:56px;font-size:28px;background:var(--card);border-radius:12px}
+.mon b{font-size:22px}
+.fbtn{width:100%;border-radius:12px;background:var(--card);border:2px solid var(--line);font-weight:700;margin-bottom:10px}
+.fpan{background:var(--card);border-radius:16px;padding:0 12px 14px;margin-bottom:12px}
+.sum{display:flex;justify-content:space-between;color:var(--sub);font-size:16px;margin:4px 2px 10px}
+.row{width:100%;display:flex;align-items:center;gap:8px;text-align:left;background:var(--card);border-radius:14px;margin-bottom:8px;padding:8px 12px 8px 0;border-left:6px solid var(--line);min-height:64px}
+.row.biz{border-left-color:var(--biz)}
+.row.home{border-left-color:var(--home)}
+.row .d{width:56px;text-align:center;color:var(--sub);font-size:15px;flex:none}
+.row .m{flex:1;min-width:0}
+.row .m b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .m small{color:var(--sub);font-size:14px}
+.row .a{font-weight:700;font-size:19px;flex:none}
+.a.out{color:var(--out)}
+.a.in{color:var(--in)}
+.tabs{display:flex;gap:4px;background:var(--card);border-radius:14px;padding:4px;margin-bottom:12px}
+.tabs button{flex:1;border-radius:10px;font-weight:700;font-size:19px}
+.tabs button.on{background:var(--c);color:#fff}
+.tot{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.tot b{font-size:30px}
+.wal{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:14px;padding:16px;margin-bottom:8px;font-size:19px}
+.wal b{font-size:24px}
+.neg{color:var(--out)}
+.mcs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mc{background:var(--card);border-radius:16px;padding:12px;border-top:6px solid var(--line)}
+.mc.biz{border-top-color:var(--biz)}
+.mc.home{border-top-color:var(--home)}
+.mc h3{margin:0 0 4px;font-size:20px}
+.mc small{display:block;color:var(--sub);font-size:14px;margin-top:8px}
+.mc b{display:block;font-size:20px}
+.mc b.in{color:var(--in)}
+.mc b.out{color:var(--out)}
+.xf{margin-top:12px;text-align:center;color:var(--sub);font-size:16px}
+.bar{background:var(--card);border-radius:14px;padding:10px 14px;margin-bottom:8px}
+.bt{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:17px}
+.bg{height:14px;background:var(--bg);border-radius:7px;overflow:hidden}
+.bg i{display:block;height:100%;background:var(--c);border-radius:7px}
+.setb{min-height:52px;border-radius:14px;color:var(--sub);font-size:18px}
+.h2{font-size:18px;margin:20px 0 8px}
+.srow,.crow{background:var(--card);border-radius:14px;padding:6px 12px;margin-bottom:8px}
+.srow.off,.crow.off{opacity:.5}
+.r1,.crow{display:flex;align-items:center;gap:8px}
+.nm{flex:1;text-align:left;font-weight:700;font-size:19px}
+.tg{min-width:72px;border-radius:10px;border:2px solid var(--line);font-size:16px}
+.r2{display:flex;align-items:center;gap:6px;color:var(--sub);padding:0 0 8px;font-size:16px}
+.num{flex:1;min-width:0;min-height:48px;border:2px solid var(--line);border-radius:10px;padding:0 10px;text-align:right;font-size:20px}
+.add{width:100%;border:2px dashed var(--line);border-radius:14px;color:var(--sub);font-weight:700;margin-top:4px}
+.act{width:100%;min-height:56px;border-radius:14px;background:#2c6db5;color:#fff;font-weight:700;margin-bottom:8px}
+.act.sub{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.del{width:100%;margin-top:28px;color:var(--out);font-weight:700;border:2px solid var(--out);border-radius:12px}
+</style>
+</head>
+<body data-frame="biz">
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script>
+'use strict';
+/* ========== ステップ1：データ処理 ========== */
+const KEY = 'kakeibo-v1';
+const uid = () => Math.random().toString(36).slice(2, 9);
+const todayStr = () => { const d = new Date(), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const yen = n => '¥' + Number(n).toLocaleString('ja-JP');
+const money = n => (n < 0 ? '−' : '') + yen(Math.abs(n));
+
+function defaults() {
+  const c = names => names.map(name => ({ id: uid(), name, hidden: false }));
+  const src = (id, name) => ({ id, name, opening: 0, hidden: false });
+  return {
+    version: 1,
+    settings: {
+      sources: [src('biz', '事業の口座'), src('home', '自家の口座'), src('cash', '現金')],
+      cats: {
+        biz:  { out: c(['仕入れ', '消耗品', '光熱費', '通信費', '交通費', '外注費', 'その他']), in: c(['売上', 'その他']) },
+        home: { out: c(['食費', '日用品', '光熱費', '通信費', '医療', '交通費', '娯楽', 'その他']), in: c(['給与・年金', 'その他']) }
+      },
+      lastBackup: null,
+      created: todayStr()
+    },
+    records: []
+  };
+}
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) { console.error(e); }
+  return defaults();
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(D)); return true; }
+  catch (e) { toast('保存できませんでした。空き容量を確認してね'); return false; }
+}
+// 財布ごとの残高 = 開始残高 + 収入 − 支出 ± 振替
+function balances(d) {
+  const b = {};
+  d.settings.sources.forEach(s => b[s.id] = s.opening || 0);
+  d.records.forEach(r => {
+    if (r.kind === 'out') b[r.source] -= r.amount;
+    else if (r.kind === 'in') b[r.source] += r.amount;
+    else { b[r.from] -= r.amount; b[r.to] += r.amount; }
+  });
+  return b;
+}
+// 月ごとの集計（ym = 'YYYY-MM'）。振替は収入・支出に入れない
+function monthSummary(d, ym) {
+  const s = { biz: { in: 0, out: 0 }, home: { in: 0, out: 0 }, xfer: 0, byCat: { biz: { out: {}, in: {} }, home: { out: {}, in: {} } } };
+  d.records.filter(r => r.date.startsWith(ym)).forEach(r => {
+    if (r.kind === 'xfer') { s.xfer += r.amount; return; }
+    s[r.frame][r.kind] += r.amount;
+    const n = catName(r), m = s.byCat[r.frame][r.kind];
+    m[n] = (m[n] || 0) + r.amount;
+  });
+  return s;
+}
+let D = load();
+
+/* ========== ステップ2：画面（ホーム・入力） ========== */
+const $app = document.getElementById('app');
+let screen = 'home';
+let f = newForm();
+function newForm() { return { kind: 'out', frame: 'biz', amount: '', store: '', cat: null, source: null, from: null, to: null, date: todayStr(), editId: null }; }
+function newL() { return { ym: todayStr().slice(0, 7), kind: null, frame: null, cat: null, source: null, open: false }; }
+let L = newL();
+function newG() { return { tab: 'bal', ym: todayStr().slice(0, 7), frame: 'biz', kind: 'out' }; }
+let G = newG();
+let T = { frame: 'biz', kind: 'out' };
+let R = { open: false, text: '' };
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 2200);
+}
+const standalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+
+function homeView() {
+  const nag = needBackup() ? '<div class="note">そろそろバックアップしてね。<button class="act" data-act="backup" style="margin-top:8px">今日バックアップする</button></div>' : '';
+  const hint = !standalone() ? '<div class="note">Safariの共有ボタンから「ホーム画面に追加」して、そのアイコンから使ってね。</div>' : '';
+  return `<div class="home"><h1>かけいぼ</h1>${hint}${nag}
+    <button class="big in1" data-act="go" data-v="input">✏️ 入力</button>
+    <button class="big" data-act="go" data-v="list">📒 一覧</button>
+    <button class="big" data-act="go" data-v="flow">💰 お金の流れ</button>
+    <button class="setb" data-act="go" data-v="settings">⚙ 設定</button></div>`;
+}
+
+function chips(items, key, cur) {
+  return `<div class="chips">${items.map(i => `<button data-act="pick" data-k="${key}" data-v="${i.id}" class="${cur === i.id ? 'on' : ''}">${esc(i.name)}</button>`).join('')}</div>`;
+}
+
+function inputView() {
+  const S = D.settings, x = f.kind === 'xfer';
+  const cats = x ? [] : S.cats[f.frame][f.kind].filter(c => !c.hidden);
+  const srcs = S.sources.filter(s => !s.hidden);
+  const kinds = [['out', '支出'], ['in', '収入'], ['xfer', '振替']];
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', '⌫'];
+  document.body.dataset.frame = x ? 'xfer' : f.frame;
+  return `<header><button class="back" data-act="go" data-v="${f.editId ? 'list' : 'home'}">‹ もどる</button><h1>${f.editId ? '修正' : '入力'}</h1></header>
+  <main>
+    <div class="seg">${kinds.map(([v, n]) => `<button data-act="kind" data-v="${v}" class="${f.kind === v ? 'on' : ''}">${n}</button>`).join('')}</div>
+    ${x ? '' : `<div class="seg frame">${[['biz', '事業'], ['home', '自家']].map(([v, n]) => `<button data-act="frame" data-v="${v}" class="${f.frame === v ? 'on' : ''}">${n}</button>`).join('')}</div>`}
+    <div class="amt">¥ <b>${f.amount ? Number(f.amount).toLocaleString('ja-JP') : '0'}</b></div>
+    <div class="pad">${keys.map(k => `<button data-act="key" data-v="${k}">${k}</button>`).join('')}</div>
+    ${x ? `<label class="t">どこから</label>${chips(srcs, 'from', f.from)}<label class="t">どこへ</label>${chips(srcs, 'to', f.to)}`
+        : `<label class="t">店</label><input class="txt" id="store" value="${esc(f.store)}" placeholder="例：スーパー○○" autocomplete="off">
+           <label class="t">分類</label>${chips(cats, 'cat', f.cat)}
+           <label class="t">どの財布から${f.kind === 'in' ? '入った' : '払った'}？</label>${chips(srcs, 'source', f.source)}`}
+    <label class="t">日付</label><input class="txt" type="date" id="date" value="${f.date}">
+    ${f.editId ? '<button class="del" data-act="del">この記録を削除</button>' : ''}
+  </main>
+  <div class="save"><button data-act="save">${f.editId ? '直して保存' : '保存'}</button></div>`;
+}
+
+function stubView(name) {
+  document.body.dataset.frame = 'biz';
+  return `<header><button class="back" data-act="go" data-v="home">‹ もどる</button><h1>${name}</h1></header><div class="stub">この画面は次のステップで作るよ</div>`;
+}
+
+/* ========== ステップ3：一覧 ========== */
+const frameName = { biz: '事業', home: '自家' };
+const srcName = id => { const s = D.settings.sources.find(x => x.id === id); return s ? s.name : '（不明）'; };
+const catName = r => { const c = D.settings.cats[r.frame][r.kind].find(x => x.id === r.cat); return c ? c.name : '（不明）'; };
+function shiftMonth(ym, n) { const [y, m] = ym.split('-').map(Number), d = new Date(y, m - 1 + n, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+
+function listItems() {
+  return D.records.map((r, i) => ({ r, i })).filter(({ r }) =>
+    r.date.startsWith(L.ym) &&
+    (!L.kind || r.kind === L.kind) &&
+    (!L.frame || r.frame === L.frame) &&
+    (!L.cat || (r.kind !== 'xfer' && catName(r) === L.cat)) &&
+    (!L.source || r.source === L.source || r.from === L.source || r.to === L.source)
+  ).sort((a, b) => b.r.date.localeCompare(a.r.date) || b.i - a.i).map(x => x.r);
+}
+function fchips(k, items) {
+  return `<div class="chips">${items.map(([id, name]) => `<button data-act="fl" data-k="${k}" data-v="${esc(id)}" class="${L[k] === id ? 'on' : ''}">${esc(name)}</button>`).join('')}</div>`;
+}
+function rowHtml(r) {
+  const d = (+r.date.slice(5, 7)) + '/' + (+r.date.slice(8, 10));
+  if (r.kind === 'xfer')
+    return `<button class="row" data-act="edit" data-id="${r.id}"><span class="d">${d}</span><span class="m"><b>${esc(srcName(r.from))} → ${esc(srcName(r.to))}</b><small>振替</small></span><span class="a">${yen(r.amount)}</span></button>`;
+  return `<button class="row ${r.frame}" data-act="edit" data-id="${r.id}"><span class="d">${d}</span><span class="m"><b>${esc(r.store || catName(r))}</b><small>${frameName[r.frame]} / ${esc(catName(r))} / ${esc(srcName(r.source))}</small></span><span class="a ${r.kind}">${r.kind === 'in' ? '+' : '−'}${yen(r.amount)}</span></button>`;
+}
+function listView() {
+  document.body.dataset.frame = 'list';
+  const rows = listItems(), [y, m] = L.ym.split('-');
+  let sin = 0, sout = 0;
+  rows.forEach(r => { if (r.kind === 'in') sin += r.amount; else if (r.kind === 'out') sout += r.amount; });
+  const n = ['kind', 'frame', 'cat', 'source'].filter(k => L[k]).length;
+  const names = new Set();
+  ['biz', 'home'].forEach(fr => { if (L.frame && L.frame !== fr) return; ['out', 'in'].forEach(k => { if (L.kind && L.kind !== k) return; D.settings.cats[fr][k].forEach(c => { if (!c.hidden) names.add(c.name); }); }); });
+  const panel = !L.open ? '' : `<div class="fpan">
+    <label class="t">種類</label>${fchips('kind', [['out', '支出'], ['in', '収入'], ['xfer', '振替']])}
+    <label class="t">事業 / 自家</label>${fchips('frame', [['biz', '事業'], ['home', '自家']])}
+    ${L.kind === 'xfer' ? '' : `<label class="t">分類</label>${fchips('cat', [...names].map(x => [x, x]))}`}
+    <label class="t">財布</label>${fchips('source', D.settings.sources.map(s => [s.id, s.name]))}
+  </div>`;
+  return `<header><button class="back" data-act="go" data-v="home">‹ もどる</button><h1>一覧</h1></header>
+  <main>
+    <div class="mon"><button data-act="mon" data-v="-1">‹</button><b>${y}年${+m}月</b><button data-act="mon" data-v="1">›</button></div>
+    <button class="fbtn" data-act="flopen">絞り込み${n ? '（' + n + '）' : ''} ${L.open ? '▲' : '▼'}</button>
+    ${panel}
+    <div class="sum"><span>${rows.length}件</span><span>収入 ${yen(sin)}　支出 ${yen(sout)}</span></div>
+    ${rows.length ? rows.map(rowHtml).join('') : '<div class="stub">該当する記録はないよ</div>'}
+  </main>`;
+}
+
+/* ========== ステップ4：お金の流れ ========== */
+function flowView() {
+  document.body.dataset.frame = G.tab === 'cat' ? G.frame : 'list';
+  const [y, m] = G.ym.split('-');
+  const tabs = [['bal', '残高'], ['sum', '収支'], ['cat', '内訳']];
+  const mon = G.tab === 'bal' ? '' : `<div class="mon"><button data-act="gmon" data-v="-1">‹</button><b>${y}年${+m}月</b><button data-act="gmon" data-v="1">›</button></div>`;
+  let body = '';
+  if (G.tab === 'bal') {
+    const b = balances(D), srcs = D.settings.sources.filter(s => !s.hidden || b[s.id] !== 0);
+    const total = srcs.reduce((t, s) => t + b[s.id], 0);
+    body = `<div class="tot"><span>いまの合計</span><b class="${total < 0 ? 'neg' : ''}">${money(total)}</b></div>` +
+      srcs.map(s => `<div class="wal"><span>${esc(s.name)}</span><b class="${b[s.id] < 0 ? 'neg' : ''}">${money(b[s.id])}</b></div>`).join('');
+  } else if (G.tab === 'sum') {
+    const s = monthSummary(D, G.ym);
+    const col = (k, n) => { const x = s[k], d = x.in - x.out; return `<div class="mc ${k}"><h3>${n}</h3><small>入ったお金</small><b class="in">${yen(x.in)}</b><small>出たお金</small><b class="out">${yen(x.out)}</b><small>差額</small><b class="${d < 0 ? 'neg' : ''}">${money(d)}</b></div>`; };
+    body = `<div class="mcs">${col('biz', '事業')}${col('home', '自家')}</div><div class="xf">この月の振替　${yen(s.xfer)}</div>`;
+  } else {
+    const s = monthSummary(D, G.ym), ent = Object.entries(s.byCat[G.frame][G.kind]).sort((a, b) => b[1] - a[1]);
+    const tot = ent.reduce((t, e) => t + e[1], 0), max = ent.length ? ent[0][1] : 1;
+    const seg = (k, items) => `<div class="seg ${k === 'frame' ? 'frame' : ''}">${items.map(([v, n]) => `<button data-act="gset" data-k="${k}" data-v="${v}" class="${G[k] === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+    body = seg('frame', [['biz', '事業'], ['home', '自家']]) + seg('kind', [['out', '支出'], ['in', '収入']]) +
+      (ent.length ? `<div class="sum"><span>合計</span><span>${yen(tot)}</span></div>` +
+        ent.map(([n, v]) => `<div class="bar"><div class="bt"><span>${esc(n)}</span><span>${yen(v)}（${Math.round(v / tot * 100)}%）</span></div><div class="bg"><i style="width:${Math.max(2, v / max * 100)}%"></i></div></div>`).join('')
+        : '<div class="stub">この月の記録はないよ</div>');
+  }
+  return `<header><button class="back" data-act="go" data-v="home">‹ もどる</button><h1>お金の流れ</h1></header>
+  <main><div class="tabs">${tabs.map(([v, n]) => `<button data-act="gtab" data-v="${v}" class="${G.tab === v ? 'on' : ''}">${n}</button>`).join('')}</div>${mon}${body}</main>`;
+}
+
+/* ========== ステップ5：バックアップと復元 ========== */
+function needBackup() {
+  if (!D.records.length) return false;
+  const base = D.settings.lastBackup || D.settings.created; if (!base) return false;
+  return (Date.now() - new Date(base + 'T00:00:00').getTime()) / 864e5 >= 30;
+}
+function markBackup() { D.settings.lastBackup = todayStr(); save(); render(true); }
+function download(name, json) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function doBackup() {
+  const name = 'kakeibo-backup-' + todayStr() + '.json', json = JSON.stringify(D);
+  try {
+    const file = new File([json], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'かけいぼのバックアップ' });
+    else if (navigator.share) await navigator.share({ title: 'かけいぼのバックアップ', text: json });
+    else download(name, json);
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+    try { download(name, json); } catch (_) { return toast('送れなかった。「テキストをコピー」を試してね'); }
+  }
+  toast('バックアップしたよ'); markBackup();
+}
+function copyBackup() {
+  if (!navigator.clipboard) return toast('コピーできない端末みたい');
+  navigator.clipboard.writeText(JSON.stringify(D)).then(() => { toast('コピーしたよ。LINEに貼ってね'); markBackup(); }).catch(() => toast('コピーできなかった'));
+}
+function applyRestore(text) {
+  let o; try { o = JSON.parse(text); } catch (e) { return toast('読み込めなかった。バックアップかな？'); }
+  if (!o || !o.settings || !Array.isArray(o.settings.sources) || !o.settings.cats || !Array.isArray(o.records)) return toast('かけいぼのバックアップじゃないみたい');
+  if (!confirm('いまのデータを、バックアップ（' + o.records.length + '件）に置き換える？元には戻せないよ。')) return;
+  if (!o.settings.created) o.settings.created = todayStr();
+  const old = D; D = o;
+  if (!save()) { D = old; return; }
+  R = { open: false, text: '' }; toast('復元したよ'); render();
+}
+
+/* ========== ステップ5：設定 ========== */
+function settingsView() {
+  document.body.dataset.frame = 'list';
+  const S = D.settings;
+  const note = !S.setupDone ? '<div class="note">まず、いまの残高を財布ごとに入れてね。あとからでも直せるよ。</div>' : '';
+  const srcs = S.sources.map(s => `<div class="srow ${s.hidden ? 'off' : ''}"><div class="r1"><button class="nm" data-act="srename" data-id="${s.id}">${esc(s.name)} ✎</button><button class="tg" data-act="shide" data-id="${s.id}">${s.hidden ? '出す' : '隠す'}</button></div><label class="r2">開始残高 ¥<input class="num" inputmode="numeric" data-sid="${s.id}" value="${s.opening || ''}" placeholder="0"></label></div>`).join('');
+  const seg = (k, items) => `<div class="seg ${k === 'frame' ? 'frame' : ''}">${items.map(([v, n]) => `<button data-act="tset" data-k="${k}" data-v="${v}" class="${T[k] === v ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  const cats = S.cats[T.frame][T.kind].map(c => `<div class="crow ${c.hidden ? 'off' : ''}"><button class="nm" data-act="crename" data-id="${c.id}">${esc(c.name)} ✎</button><button class="tg" data-act="chide" data-id="${c.id}">${c.hidden ? '出す' : '隠す'}</button></div>`).join('');
+  return `<header><button class="back" data-act="go" data-v="home">‹ もどる</button><h1>設定</h1></header>
+  <main>${note}
+    <h2 class="h2">財布</h2>${srcs}<button class="add" data-act="sadd">＋ 財布を追加</button>
+    <h2 class="h2">分類</h2>${seg('frame', [['biz', '事業'], ['home', '自家']])}${seg('kind', [['out', '支出'], ['in', '収入']])}
+    ${cats}<button class="add" data-act="cadd">＋ 分類を追加</button>
+    <h2 class="h2">バックアップ</h2>
+    <div class="sum"><span>${S.lastBackup ? '最後のバックアップ：' + S.lastBackup : 'まだバックアップしてないよ'}</span></div>
+    <button class="act" data-act="backup">LINEなどに送る</button>
+    <button class="act sub" data-act="bcopy">テキストをコピー</button>
+    <h2 class="h2">復元</h2>
+    <button class="act sub" data-act="rfile">ファイルから復元</button>
+    <button class="act sub" data-act="rpaste">貼り付けて復元</button>
+    ${R.open ? `<textarea class="txt" id="rtext" rows="5" placeholder="コピーしたバックアップをここに貼る">${esc(R.text)}</textarea><button class="act" data-act="rgo" style="margin-top:8px">この内容で復元</button>` : ''}
+    <input type="file" id="rfile" hidden>
+    <div class="sum" style="margin-top:16px"><span>「隠す」と入力の選択肢から消えるだけで、過去の記録はそのまま残るよ。</span></div>
+  </main>`;
+}
+
+function render(keep) {
+  const y = window.scrollY;
+  if (screen === 'home') { document.body.dataset.frame = 'biz'; $app.innerHTML = homeView(); }
+  else if (screen === 'input') $app.innerHTML = inputView();
+  else if (screen === 'list') $app.innerHTML = listView();
+  else if (screen === 'settings') $app.innerHTML = settingsView();
+  else $app.innerHTML = flowView();
+  window.scrollTo(0, keep ? y : 0);
+}
+
+function saveRecord() {
+  const amount = parseInt(f.amount || '0', 10);
+  if (!amount) return toast('金額を入れてね');
+  let r;
+  if (f.kind === 'xfer') {
+    if (!f.from || !f.to) return toast('出す財布と入れる財布を選んでね');
+    if (f.from === f.to) return toast('同じ財布は選べないよ');
+    r = { id: uid(), date: f.date, kind: 'xfer', amount, from: f.from, to: f.to };
+  } else {
+    if (!f.cat) return toast('分類を選んでね');
+    if (!f.source) return toast('財布を選んでね');
+    r = { id: uid(), date: f.date, kind: f.kind, frame: f.frame, amount, store: f.store.trim(), cat: f.cat, source: f.source };
+  }
+  const snap = JSON.stringify(D.records);
+  if (f.editId) {
+    r.id = f.editId;
+    D.records = D.records.map(x => x.id === f.editId ? r : x);
+  } else D.records.push(r);
+  if (!save()) { D.records = JSON.parse(snap); return; }
+  toast(f.editId ? '直したよ' : '保存したよ');
+  screen = f.editId ? 'list' : 'home';
+  f = newForm(); render();
+}
+
+$app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, v = b.dataset.v;
+  if (a === 'go') {
+    if (screen === 'settings') { D.settings.setupDone = true; save(); }
+    if (v === 'input') f = newForm();
+    if (v === 'list' && screen === 'home') L = newL();
+    if (v === 'flow' && screen === 'home') G = newG();
+    if (v === 'home') f = newForm();
+    screen = v; render();
+  }
+  else if (a === 'kind') { f.kind = v; f.cat = null; render(true); }
+  else if (a === 'frame') { f.frame = v; f.cat = null; render(true); }
+  else if (a === 'pick') { f[b.dataset.k] = v; render(true); }
+  else if (a === 'key') {
+    if (v === '⌫') f.amount = f.amount.slice(0, -1);
+    else if ((f.amount + v).length <= 9) f.amount = String(parseInt((f.amount || '') + v, 10) || '');
+    render(true);
+  }
+  else if (a === 'save') saveRecord();
+  else if (a === 'tset') { T[b.dataset.k] = v; render(true); }
+  else if (a === 'srename' || a === 'crename') {
+    const list = a === 'srename' ? D.settings.sources : D.settings.cats[T.frame][T.kind];
+    const it = list.find(x => x.id === b.dataset.id); if (!it) return;
+    const n = prompt('新しい名前', it.name); if (n === null || !n.trim()) return;
+    it.name = n.trim(); save(); render(true);
+  }
+  else if (a === 'shide' || a === 'chide') {
+    const list = a === 'shide' ? D.settings.sources : D.settings.cats[T.frame][T.kind];
+    const it = list.find(x => x.id === b.dataset.id); if (!it) return;
+    it.hidden = !it.hidden; save(); render(true);
+  }
+  else if (a === 'sadd' || a === 'cadd') {
+    const n = prompt(a === 'sadd' ? '財布の名前' : '分類の名前'); if (n === null || !n.trim()) return;
+    if (a === 'sadd') D.settings.sources.push({ id: uid(), name: n.trim(), opening: 0, hidden: false });
+    else D.settings.cats[T.frame][T.kind].push({ id: uid(), name: n.trim(), hidden: false });
+    save(); render(true);
+  }
+  else if (a === 'backup') doBackup();
+  else if (a === 'bcopy') copyBackup();
+  else if (a === 'rfile') document.getElementById('rfile').click();
+  else if (a === 'rpaste') { R.open = !R.open; render(true); }
+  else if (a === 'rgo') applyRestore(R.text);
+  else if (a === 'gtab') { G.tab = v; render(); }
+  else if (a === 'gmon') { G.ym = shiftMonth(G.ym, +v); render(true); }
+  else if (a === 'gset') { G[b.dataset.k] = v; render(true); }
+  else if (a === 'mon') { L.ym = shiftMonth(L.ym, +v); render(); }
+  else if (a === 'flopen') { L.open = !L.open; render(true); }
+  else if (a === 'fl') {
+    const k = b.dataset.k;
+    L[k] = L[k] === v ? null : v;
+    if (k === 'kind' || k === 'frame') L.cat = null;
+    render(true);
+  }
+  else if (a === 'edit') {
+    const r = D.records.find(x => x.id === b.dataset.id); if (!r) return;
+    f = { ...newForm(), kind: r.kind, date: r.date, amount: String(r.amount), editId: r.id };
+    if (r.kind === 'xfer') { f.from = r.from; f.to = r.to; }
+    else { f.frame = r.frame; f.store = r.store || ''; f.cat = r.cat; f.source = r.source; }
+    screen = 'input'; render();
+  }
+  else if (a === 'del') {
+    if (!confirm('この記録を削除していい？')) return;
+    const snap = JSON.stringify(D.records);
+    D.records = D.records.filter(x => x.id !== f.editId);
+    if (!save()) { D.records = JSON.parse(snap); return; }
+    toast('削除したよ');
+    f = newForm(); screen = 'list'; render();
+  }
+});
+$app.addEventListener('input', e => {
+  if (e.target.dataset.sid) {
+    const s = D.settings.sources.find(x => x.id === e.target.dataset.sid);
+    if (s) { s.opening = parseInt(e.target.value.replace(/[^\d]/g, ''), 10) || 0; D.settings.setupDone = true; save(); }
+  }
+  if (e.target.id === 'rtext') R.text = e.target.value;
+  if (e.target.id === 'store') f.store = e.target.value;
+  if (e.target.id === 'date') f.date = e.target.value || todayStr();
+});
+
+$app.addEventListener('change', e => {
+  if (e.target.id !== 'rfile') return;
+  const fl = e.target.files[0]; e.target.value = '';
+  if (fl) fl.text().then(applyRestore).catch(() => toast('ファイルを読めなかった'));
+});
+
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+window.kakeibo = { get data() { return D; }, balances: () => balances(D), month: ym => monthSummary(D, ym) }; // 動作確認用
+if (!D.settings.created) { D.settings.created = todayStr(); save(); }
+if (!D.settings.setupDone && !D.records.length) screen = 'settings';
+render();
+</script>
+</body>
+</html>
